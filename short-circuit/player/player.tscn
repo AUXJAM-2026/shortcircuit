@@ -1,0 +1,9 @@
+[gd_scene load_steps=2 format=3 uid="uid://8mnt2pbk7kse"]
+
+[ext_resource type="SpriteFrames" uid="uid://8xd7l6w4qrcv" path="res://player/SpriteFrame_Player.tres" id="1_oul6g"]
+
+[node name="Player" type="Node2D"]
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+sprite_frames = ExtResource("1_oul6g")
+animation = &"up"

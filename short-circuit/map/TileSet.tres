@@ -1,0 +1,80 @@
+[gd_resource type="TileSet" load_steps=7 format=3 uid="uid://kxqpqc0vx2k8"]
+
+[ext_resource type="Texture2D" uid="uid://dh0xx42xxcbt2" path="res://sprites/tilemap_wires.png" id="1_u4rtq"]
+[ext_resource type="Texture2D" uid="uid://bbak185t8qqjc" path="res://sprites/tilemap_external_electrical.png" id="2_8cg7x"]
+[ext_resource type="Texture2D" uid="uid://brd82yg5jri4u" path="res://sprites/tilemap_external_background.png" id="3_8cg7x"]
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_pm80y"]
+resource_name = "WIRES"
+texture = ExtResource("1_u4rtq")
+texture_region_size = Vector2i(128, 128)
+0:0/0 = 0
+0:0/0/terrain_set = 0
+0:0/0/terrain = 0
+0:0/0/terrains_peering_bit/right_side = 0
+0:0/0/terrains_peering_bit/bottom_side = 0
+1:0/0 = 0
+1:0/0/terrain_set = 0
+1:0/0/terrain = 0
+1:0/0/terrains_peering_bit/bottom_side = 0
+1:0/0/terrains_peering_bit/left_side = 0
+2:0/0 = 0
+2:0/0/terrain_set = 0
+2:0/0/terrain = 0
+2:0/0/terrains_peering_bit/bottom_side = 0
+3:0/0 = 0
+3:0/0/terrain_set = 0
+3:0/0/terrain = 0
+3:0/0/terrains_peering_bit/right_side = 0
+4:0/0 = 0
+4:0/0/terrain_set = 0
+4:0/0/terrain = 0
+4:0/0/terrains_peering_bit/left_side = 0
+0:1/0 = 0
+0:1/0/terrain_set = 0
+0:1/0/terrain = 0
+0:1/0/terrains_peering_bit/right_side = 0
+0:1/0/terrains_peering_bit/top_side = 0
+1:1/0 = 0
+1:1/0/terrain_set = 0
+1:1/0/terrain = 0
+1:1/0/terrains_peering_bit/left_side = 0
+1:1/0/terrains_peering_bit/top_side = 0
+2:1/0 = 0
+2:1/0/terrain_set = 0
+2:1/0/terrain = 0
+2:1/0/terrains_peering_bit/top_side = 0
+3:1/0 = 0
+3:1/0/terrain_set = 0
+3:1/0/terrain = 0
+3:1/0/terrains_peering_bit/bottom_side = 0
+3:1/0/terrains_peering_bit/top_side = 0
+4:1/0 = 0
+4:1/0/terrain_set = 0
+4:1/0/terrain = 0
+4:1/0/terrains_peering_bit/right_side = 0
+4:1/0/terrains_peering_bit/left_side = 0
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_p8i3l"]
+resource_name = "INTERACTABLES"
+texture = ExtResource("2_8cg7x")
+texture_region_size = Vector2i(128, 128)
+0:0/0 = 0
+0:1/0 = 0
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_1b2on"]
+texture = ExtResource("3_8cg7x")
+texture_region_size = Vector2i(128, 128)
+0:0/0 = 0
+0:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-64, -64, 64, -64, 64, 64, -64, 64)
+0:1/0 = 0
+
+[resource]
+tile_size = Vector2i(128, 128)
+physics_layer_0/collision_layer = 1
+terrain_set_0/mode = 0
+terrain_set_0/terrain_0/name = "WIRE_PLAYER"
+terrain_set_0/terrain_0/color = Color(0.341176, 1, 1, 1)
+sources/0 = SubResource("TileSetAtlasSource_pm80y")
+sources/1 = SubResource("TileSetAtlasSource_p8i3l")
+sources/2 = SubResource("TileSetAtlasSource_1b2on")

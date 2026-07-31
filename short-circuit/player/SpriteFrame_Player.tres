@@ -1,0 +1,54 @@
+[gd_resource type="SpriteFrames" load_steps=6 format=3 uid="uid://8xd7l6w4qrcv"]
+
+[ext_resource type="Texture2D" uid="uid://ccx4vcay1p6iv" path="res://sprites/tilemap_player.png" id="1_5yley"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_6cgq5"]
+atlas = ExtResource("1_5yley")
+region = Rect2(0, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_0pt20"]
+atlas = ExtResource("1_5yley")
+region = Rect2(0, 256, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_yf404"]
+atlas = ExtResource("1_5yley")
+region = Rect2(0, 384, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_i5nmk"]
+atlas = ExtResource("1_5yley")
+region = Rect2(0, 128, 128, 128)
+
+[resource]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_6cgq5")
+}],
+"loop": true,
+"name": &"down",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_0pt20")
+}],
+"loop": true,
+"name": &"left",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_yf404")
+}],
+"loop": true,
+"name": &"right",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_i5nmk")
+}],
+"loop": true,
+"name": &"up",
+"speed": 5.0
+}]

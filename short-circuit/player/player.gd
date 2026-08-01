@@ -4,7 +4,7 @@ extends Node2D
 @onready var body = $Body_Anim
 
 @export var max_charges := 3
-@export var max_wire_length := 15
+@export var max_wire_length := 5
 var charge = max_charges
 var length = max_wire_length
 var wire_path : Array[Vector2i]
@@ -36,12 +36,25 @@ func _physics_process(delta: float) -> void:
 		desired_cell = desired_cell + Vector2i(1, 0)
 		facing = 3
 	
-	if desired_cell != current_cell and _is_valid_move(desired_cell):
+	if desired_cell != current_cell and _is_valid_move(desired_cell) and charge > 0:
 		_move_to_cell(desired_cell)
 		_update_anim(facing)
+		
+		print(is_plugged)
+		if is_plugged:
+			charge = max_charges
+		else:
+			charge -= 1
+		print(charge)
 	
 	if Input.is_action_just_pressed("retract"):
 		_pull_wire()
+		is_plugged = map.is_plugged(wire_path)
+		
+		print(is_plugged)
+		if is_plugged:
+			charge = max_charges
+		print(charge)
 
 
 func _is_valid_move(cell: Vector2i) -> bool:
@@ -52,34 +65,17 @@ func _move_to_cell(cell: Vector2i) -> void:
 	
 	position = map.cell_to_world(cell)
 	current_cell = map.world_to_cell(position)
-	
+
 func _update_wire(cell: Vector2i, current_cell: Vector2i) -> void:
+	
 	is_plugged = map.is_plugged(wire_path)
 	
-	if wire_path.size() > 1:
-		
-		'''
-		retracting by moving currently disabled for logic design reason
-		'''
-		if cell == wire_path[wire_path.size() -2] and false:
-			print("pull")
-			_pull_player()
-			print(wire_path)
-			return
-	
-		if wire_path.size() >= max_wire_length:
-			_drag_wire(cell, facing)
-			print("drag")
-			print(wire_path)
-			return
-	
-	if is_plugged:
-		_add_wire(cell, facing)
-	else:
+	if wire_path.size() > max_wire_length or !is_plugged:
 		_drag_wire(cell, facing)
-	
-	print("add")
-	print(wire_path)
+	else:
+		_add_wire(cell, facing)
+
+	is_plugged = map.is_plugged(wire_path)
 
 func _undo_move() -> void:
 	var desired_cell = wire_path.pop_back()
@@ -97,7 +93,6 @@ func _update_anim(facing) -> void:
 		3:
 			body.play("right")
 	
-
 func _add_wire(cell, facing) -> void:
 	wire_path.push_back(cell)
 	facing_path.push_back(facing)

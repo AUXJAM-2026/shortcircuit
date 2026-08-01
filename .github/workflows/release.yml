@@ -1,0 +1,359 @@
+name: Package Web + Docker Build & Push
+
+on:
+  push:
+    branches: ["release"]
+  workflow_dispatch:
+
+# contents:write  — create tags + GitHub Releases
+# packages:write  — push to GitHub Container Registry (ghcr.io)
+permissions:
+  contents: write
+  packages: write
+
+env:
+  GODOT_VERSION: "4.4.0"
+
+  # Export presets defined in the Godot export configuration.
+  EXPORT_PRESET: "Web"
+  EXPORT_PRESET_SLUG: "web"
+
+  PROJECT_DIR: "short-circuit"
+  GAME_SLUG: "short-circuit"
+
+jobs:
+  # ─────────────────────────────────────────────────────────────────────────────
+  # JOB 1: Build both Godot Web exports.
+  #
+  # Outputs:
+  #   build/EXPORT_PRESET_SLUG/ -> uploaded for Docker and zipped for GitHub Release
+  #
+  # Cache-busting strategy:
+  #   Godot Web sidecar files are derived from the export HTML basename.
+  #   By exporting to versioned basenames such as:
+  #     export_preset_slug-v1.2.3.html
+  #   Godot also emits matching versioned .js/.wasm/.pck files.
+  #
+  #   We then copy the HTML file to index.html for clean nginx routing.
+  #   The copied index.html still references the versioned assets, so browsers
+  #   will fetch new asset URLs after each release.
+  # ─────────────────────────────────────────────────────────────────────────────
+  package_web:
+    if: github.ref == 'refs/heads/release'
+    name: Package Web + GitHub Release
+    runs-on: ubuntu-latest
+
+    outputs:
+      version:  ${{ steps.version.outputs.version }}
+      tag:      ${{ steps.meta.outputs.tag }}
+      zip_name: ${{ steps.package.outputs.zip_name }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Read version
+        id: version
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          VERSION_FILE="${PROJECT_DIR}/VERSION"
+
+          if [[ ! -f "${VERSION_FILE}" ]]; then
+          echo "::error::Missing version file: ${VERSION_FILE}"
+          exit 1
+          fi
+
+          V="$(tr -d '[:space:]' < "${VERSION_FILE}")"
+
+          if [[ ! "${V}" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z]+([.-][0-9A-Za-z]+)*)?$ ]]; then
+          echo "::error::Invalid release version: ${V}"
+          exit 1
+          fi
+
+          echo "version=${V}" >> "${GITHUB_OUTPUT}"
+          echo "Version: ${V}"
+
+      - name: Compute metadata
+        id: meta
+        shell: bash
+        run: |
+          set -euo pipefail
+          TAG="v${{ steps.version.outputs.version }}"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "Tag: $TAG"
+
+      - name: Setup Godot (with export templates)
+        uses: chickensoft-games/setup-godot@v2
+        with:
+          version: ${{ env.GODOT_VERSION }}
+          use-dotnet: false
+          include-templates: true
+
+      - name: Cache Godot imports
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.PROJECT_DIR }}/.godot/imported
+          key: godot-import-${{ runner.os }}-${{ hashFiles('**/project.godot', '**/*.tscn', '**/*.tres', '**/*.gd') }}
+          restore-keys: godot-import-${{ runner.os }}-
+
+      - name: Prepare build directories
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf "${GITHUB_WORKSPACE}/build"
+          mkdir -p "${GITHUB_WORKSPACE}/build/${EXPORT_PRESET_SLUG}"
+
+      - name: Run Godot Export
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          # Use the release tag in the export basename so Godot-generated
+          # sidecar assets get versioned filenames:
+          #   gameslug-v1.2.3.js
+          #   gameslug-v1.2.3.wasm
+          #   gameslug-v1.2.3.pck
+          GAME_FILENAME="${GAME_SLUG}-${{ steps.meta.outputs.tag }}"
+          GAME_INDEX_PATH="${GITHUB_WORKSPACE}/build/${EXPORT_PRESET_SLUG}/${GAME_FILENAME}.html"
+
+          cd "${PROJECT_DIR}"
+          godot --headless --verbose \
+            --export-release "${EXPORT_PRESET}" \
+            "${GAME_INDEX_PATH}"
+
+          # Keep a clean nginx entrypoint at /index.html.
+          # The copied HTML still references the versioned sidecar assets.
+          cp "${GAME_INDEX_PATH}" "${GITHUB_WORKSPACE}/build/${EXPORT_PRESET_SLUG}/index.html"
+
+      - name: Verify exported variant(s)
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          test -f "${GITHUB_WORKSPACE}/build/${EXPORT_PRESET_SLUG}/index.html"
+
+          echo "--- ${EXPORT_PRESET} export ---"
+          find "${GITHUB_WORKSPACE}/build/${EXPORT_PRESET_SLUG}" -maxdepth 1 -type f -printf "%f\n" | sort
+
+      - name: Package Zip Archive
+        id: package
+        shell: bash
+        run: |
+          set -euo pipefail
+          ZIP_NAME="${GAME_SLUG}-${EXPORT_PRESET_SLUG}-${{ steps.meta.outputs.tag }}.zip"
+          (cd "${GITHUB_WORKSPACE}/build/${EXPORT_PRESET_SLUG}" && zip -r "../${ZIP_NAME}" .)
+          echo "zip_name=$ZIP_NAME" >> "$GITHUB_OUTPUT"
+          echo "Created: build/${ZIP_NAME}"
+          ls -lah "${GITHUB_WORKSPACE}/build"
+
+      # Upload both unpacked exports so the Docker job can copy them into the final image at nginx.
+      - name: Upload export artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.EXPORT_PRESET_SLUG }}-${{ steps.meta.outputs.tag }}
+          path: build/${{ env.EXPORT_PRESET_SLUG }}/
+          if-no-files-found: error
+
+      - name: Create tag if missing
+        shell: bash
+        env:
+            TAG: ${{ steps.meta.outputs.tag }}
+        run: |
+          set -euo pipefail
+
+          if git show-ref --verify --quiet "refs/tags/${TAG}"; then
+          TAG_COMMIT="$(git rev-list -n 1 "${TAG}")"
+
+          if [[ "${TAG_COMMIT}" != "${GITHUB_SHA}" ]]; then
+              echo "::error::Tag ${TAG} already points to ${TAG_COMMIT}, not ${GITHUB_SHA}."
+              echo "::error::Increment ${PROJECT_DIR}/VERSION before publishing."
+              exit 1
+          fi
+
+          echo "Tag ${TAG} already points to the current commit."
+          else
+          git tag --annotate "${TAG}" "${GITHUB_SHA}" \
+              --message "Release ${TAG}"
+          git push origin "refs/tags/${TAG}"
+          fi
+
+      - name: Create/Update GitHub Release + upload export artifact
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.meta.outputs.tag }}
+          name: ${{ env.EXPORT_PRESET_SLUG }} Release ${{ steps.meta.outputs.tag }}
+          draft: false
+          prerelease: false
+          files: build/${{ steps.package.outputs.zip_name }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # JOB 2: Build a Docker image with web export served by nginx,
+  #         then push it to GitHub Container Registry (ghcr.io).
+  #
+  # Image tags produced:
+  #   ghcr.io/<owner>/<repo>:<version>   e.g. ghcr.io/acme/my-repo:0.2.1
+  #   ghcr.io/<owner>/<repo>:latest
+  #
+  # The Dockerfile expects:
+  #   dist/EXPORT_PRESET_SLUG/ -> copied to /usr/share/nginx/html/
+  #
+  # nginx routes:
+  #   /                    -> Web export
+  # ─────────────────────────────────────────────────────────────────────────────
+  build_docker:
+    name: Build + Push Web Docker Image
+    runs-on: ubuntu-latest
+    needs: package_web
+
+    env:
+      TAG: ${{ needs.package_web.outputs.tag }}
+      VERSION: ${{ needs.package_web.outputs.version }}
+
+      # Lowercase owner/repo – required by ghcr.io image names.
+      # github.repository is already "<owner>/<repo>" in lowercase on GitHub.
+      IMAGE: ghcr.io/${{ github.repository }}
+
+    steps:
+      - name: Checkout (for Dockerfile)
+        uses: actions/checkout@v4
+
+      - name: Download exported artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ env.EXPORT_PRESET_SLUG }}-${{ env.TAG }}
+          path: dist/${{ env.EXPORT_PRESET_SLUG }}
+
+      - name: Verify Docker build context exports
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          test -f dist/${EXPORT_PRESET_SLUG}/index.html
+
+          echo "--- dist/${EXPORT_PRESET_SLUG} contents ---"
+          find dist/${EXPORT_PRESET_SLUG} -maxdepth 1 -type f -printf "%f\n" | sort
+
+      # Enable multi-platform builds. Even though we only target linux/amd64
+      # here, Buildx is still the recommended builder for modern Docker workflows.
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # Derive OCI-standard image metadata (labels + tags) from the version.
+      - name: Extract image metadata
+        id: image_meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.IMAGE }}
+          # Produce two tags: the exact version and `latest`.
+          tags: |
+            type=raw,value=${{ env.VERSION }}
+            type=raw,value=latest
+
+      # Build and push – linux/amd64 only, as requested.
+      # Layer cache is stored in the GitHub Actions cache to speed up rebuilds.
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile
+          platforms: linux/amd64
+          push: true
+          tags: ${{ steps.image_meta.outputs.tags }}
+          labels: ${{ steps.image_meta.outputs.labels }}
+          cache-from: type=gha,scope=web
+          cache-to:   type=gha,mode=max,scope=web
+
+      # Print a deployment summary to the Actions run page for quick reference.
+      - name: Deployment summary
+        shell: bash
+        run: |
+          echo "### ${{ env.EXPORT_PRESET }} Docker image pushed :rocket:" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Key | Value |" >> "$GITHUB_STEP_SUMMARY"
+          echo "|-----|-------|" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Registry | ghcr.io |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Image | \`${{ env.IMAGE }}\` |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Version tag | \`${{ env.VERSION }}\` |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Git tag | \`${{ env.TAG }}\` |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| nginx root | at \`/\` |" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "**Pull:** \`docker pull ${{ env.IMAGE }}:${{ env.VERSION }}\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "**Run:** \`docker run -p 8080:80 ${{ env.IMAGE }}:${{ env.VERSION }}\`" >> "$GITHUB_STEP_SUMMARY"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # JOB 3: Upload the Web export to itch.io using Butler.
+  #
+  # Required repository configuration:
+  #   Secret:
+  #     BUTLER_CREDENTIALS — itch.io API key
+  #
+  #   Variables:
+  #     ITCH_USER — itch.io username
+  #     ITCH_GAME — game URL slug, e.g. "short-circuit"
+  #
+  # The resulting itch.io channel is:
+  #   <ITCH_USER>/<ITCH_GAME>:web
+  # ─────────────────────────────────────────────────────────────────────────────
+  upload_itch:
+    name: Upload Web Build to itch.io
+    runs-on: ubuntu-latest
+    needs: package_web
+
+    permissions:
+      contents: read
+
+    steps:
+      - name: Download Web export
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ env.EXPORT_PRESET_SLUG }}-${{ needs.package_web.outputs.tag }}
+          path: dist/${{ env.EXPORT_PRESET_SLUG }}
+
+      - name: Verify itch.io upload contents
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          test -f "dist/${EXPORT_PRESET_SLUG}/index.html"
+
+          echo "--- itch.io Web upload ---"
+          find "dist/${EXPORT_PRESET_SLUG}" \
+            -maxdepth 1 \
+            -type f \
+            -printf "%f\n" |
+            sort
+
+      - name: Upload Web build to itch.io
+        uses: Ayowel/butler-to-itch@v2
+        with:
+          butler_key: ${{ secrets.BUTLER_CREDENTIALS }}
+          itch_user: ${{ vars.ITCH_USER }}
+          itch_game: ${{ vars.ITCH_GAME }}
+          version: ${{ needs.package_web.outputs.version }}
+          files: |
+            web dist/${{ env.EXPORT_PRESET_SLUG }}
+
+      - name: Deployment summary
+        shell: bash
+        run: |
+          echo "### Web build uploaded to itch.io :rocket:" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Key | Value |" >> "$GITHUB_STEP_SUMMARY"
+          echo "|-----|-------|" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Project | \`${{ vars.ITCH_USER }}/${{ vars.ITCH_GAME }}\` |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Channel | \`web\` |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Version | \`${{ needs.package_web.outputs.version }}\` |" >> "$GITHUB_STEP_SUMMARY"

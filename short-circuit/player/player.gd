@@ -59,7 +59,7 @@ func _physics_process(delta: float) -> void:
 	if Input.is_action_just_pressed("retract"):
 		_pull_wire()
 		is_plugged = map.is_plugged(wire_path)
-		
+
 		if is_plugged:
 			charge = max_charges
 

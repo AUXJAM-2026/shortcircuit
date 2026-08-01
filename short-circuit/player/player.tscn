@@ -1,9 +1,11 @@
-[gd_scene load_steps=2 format=3 uid="uid://8mnt2pbk7kse"]
+[gd_scene load_steps=3 format=3 uid="uid://8mnt2pbk7kse"]
 
 [ext_resource type="SpriteFrames" uid="uid://8xd7l6w4qrcv" path="res://player/SpriteFrame_Player.tres" id="1_oul6g"]
+[ext_resource type="Script" uid="uid://blykvopagshkk" path="res://player/player.gd" id="1_rkbax"]
 
 [node name="Player" type="Node2D"]
+script = ExtResource("1_rkbax")
 
-[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+[node name="Body_Anim" type="AnimatedSprite2D" parent="."]
 sprite_frames = ExtResource("1_oul6g")
-animation = &"up"
+animation = &"down"

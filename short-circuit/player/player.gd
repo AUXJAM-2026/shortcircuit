@@ -2,11 +2,13 @@ extends Node2D
 
 @onready var map = $"/root/Main/Map"
 @onready var body = $Body_Anim
+@onready var ui = $"/root/Main/UI"
 
-@export var max_charges := 3
-@export var max_wire_length := 5
-var charge = max_charges
-var length = max_wire_length
+var max_charges
+var max_wire_length
+
+var charge
+var length
 var wire_path : Array[Vector2i]
 var facing_path := []
 
@@ -17,10 +19,19 @@ var is_plugged = true
 var is_moving = false
 
 func _ready():
+	max_charges = map.get_max_charges()
+	max_wire_length = map.get_max_wire_length()
+	
+	charge = max_charges
+	length = max_wire_length
+	
 	_move_to_cell(Vector2i(0, 0))
 	_update_anim(facing)
+	
+
 
 func _physics_process(delta: float) -> void:
+	ui.update_charge(charge)
 	var desired_cell := current_cell
 
 	if Input.is_action_just_pressed("move_down"):
@@ -40,22 +51,17 @@ func _physics_process(delta: float) -> void:
 		_move_to_cell(desired_cell)
 		_update_anim(facing)
 		
-		print(is_plugged)
 		if is_plugged:
 			charge = max_charges
 		else:
 			charge -= 1
-		print(charge)
 	
 	if Input.is_action_just_pressed("retract"):
 		_pull_wire()
 		is_plugged = map.is_plugged(wire_path)
 		
-		print(is_plugged)
 		if is_plugged:
 			charge = max_charges
-		print(charge)
-
 
 func _is_valid_move(cell: Vector2i) -> bool:
 	return map.is_moveable(cell) and !wire_path.has(cell)

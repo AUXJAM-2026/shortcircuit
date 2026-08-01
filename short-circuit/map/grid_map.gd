@@ -6,6 +6,9 @@ var astar := AStarGrid2D.new()
 @onready var map_plugs = $Plugs
 @onready var map_sockets = $Sockets
 
+@export var max_charges := 3
+@export var max_wire_length := 5
+
 func _ready():
 	_build_grid_from_tiles()
 
@@ -53,3 +56,9 @@ func is_plugged(wire_path: Array[Vector2i]) -> bool:
 		return socket_list.has(wire_path[0])
 	else:
 		return true
+
+func get_max_charges() -> int:
+	return max_charges
+
+func get_max_wire_length() -> int:
+	return max_wire_length

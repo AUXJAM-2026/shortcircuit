@@ -1,0 +1,34 @@
+[gd_scene load_steps=5 format=3 uid="uid://6l1skh0rk6go"]
+
+[ext_resource type="Texture2D" uid="uid://divpv5d8giawv" path="res://sprites/sprite_battery_end.png" id="1_27fn8"]
+[ext_resource type="Script" uid="uid://3d4vwajxaufi" path="res://ui/ui.gd" id="1_nltto"]
+[ext_resource type="Texture2D" uid="uid://csa4m8oynhjur" path="res://sprites/sprite_battery_head.png" id="3_ibotj"]
+
+[sub_resource type="Theme" id="Theme_27fn8"]
+HBoxContainer/constants/separation = 0
+
+[node name="UI" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_nltto")
+
+[node name="Battery" type="HBoxContainer" parent="."]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+theme = SubResource("Theme_27fn8")
+
+[node name="End" type="TextureRect" parent="Battery"]
+layout_mode = 2
+texture = ExtResource("1_27fn8")
+
+[node name="Middle" type="HBoxContainer" parent="Battery"]
+layout_mode = 2
+
+[node name="Head" type="TextureRect" parent="Battery"]
+layout_mode = 2
+texture = ExtResource("3_ibotj")

@@ -13,6 +13,7 @@ var facing_path := []
 var facing := 0
 var current_cell: Vector2i
 
+var is_plugged = true
 var is_moving = false
 
 func _ready():
@@ -34,16 +35,17 @@ func _physics_process(delta: float) -> void:
 	if Input.is_action_just_pressed("move_right"):
 		desired_cell = desired_cell + Vector2i(1, 0)
 		facing = 3
-		
-	_update_anim(facing)
 	
 	if desired_cell != current_cell and _is_valid_move(desired_cell):
 		_move_to_cell(desired_cell)
-		
+		_update_anim(facing)
+	
+	if Input.is_action_just_pressed("retract"):
+		_pull_wire()
 
 
 func _is_valid_move(cell: Vector2i) -> bool:
-	return map.is_moveable(cell) and _is_not_on_wire_path(cell)
+	return map.is_moveable(cell) and !wire_path.has(cell)
 
 func _move_to_cell(cell: Vector2i) -> void:
 	_update_wire(cell, current_cell)
@@ -52,11 +54,14 @@ func _move_to_cell(cell: Vector2i) -> void:
 	current_cell = map.world_to_cell(position)
 	
 func _update_wire(cell: Vector2i, current_cell: Vector2i) -> void:
-	print(cell)
-	print(wire_path)
+	is_plugged = map.is_plugged(wire_path)
+	
 	if wire_path.size() > 1:
-
-		if cell == wire_path[wire_path.size() -2]:
+		
+		'''
+		retracting by moving currently disabled for logic design reason
+		'''
+		if cell == wire_path[wire_path.size() -2] and false:
 			print("pull")
 			_pull_player()
 			print(wire_path)
@@ -68,7 +73,11 @@ func _update_wire(cell: Vector2i, current_cell: Vector2i) -> void:
 			print(wire_path)
 			return
 	
-	_add_wire(cell, facing)
+	if is_plugged:
+		_add_wire(cell, facing)
+	else:
+		_drag_wire(cell, facing)
+	
 	print("add")
 	print(wire_path)
 
@@ -96,10 +105,11 @@ func _add_wire(cell, facing) -> void:
 	map.update_wire(wire_path)
 
 func _pull_wire() -> void:
-	wire_path.pop_front()
-	facing_path.pop_front()
-	
-	map.update_wire(wire_path)
+	if wire_path.size() > 1:
+		wire_path.pop_front()
+		facing_path.pop_front()
+		
+		map.update_wire(wire_path)
 
 func _pull_player() -> void:
 	wire_path.pop_back()
@@ -112,8 +122,3 @@ func _drag_wire(cell, facing) -> void:
 	_pull_wire()
 	
 	map.update_wire(wire_path)
-
-func _is_not_on_wire_path(cell: Vector2i) -> bool:
-	if wire_path.size() > 1:
-		return !(cell != wire_path[wire_path.size() -2] and wire_path.has(cell))
-	return true

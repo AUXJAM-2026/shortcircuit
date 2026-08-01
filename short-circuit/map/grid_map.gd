@@ -4,6 +4,7 @@ var astar := AStarGrid2D.new()
 @onready var map_barrier = $Barrier
 @onready var map_wire = $Wire
 @onready var map_plugs = $Plugs
+@onready var map_sockets = $Sockets
 
 func _ready():
 	_build_grid_from_tiles()
@@ -42,5 +43,13 @@ func update_wire(wire_path: Array[Vector2i]) -> void:
 	map_wire.clear()
 	map_plugs.clear()
 	map_wire.set_cells_terrain_path(wire_path, 0, 0)
-	map_plugs.set_cell(wire_path[0], 1, Vector2i(0, 1))
+	if wire_path.size() > 1:
+		map_plugs.set_cell(wire_path[0], 1, Vector2i(0, 1))
 	return
+
+func is_plugged(wire_path: Array[Vector2i]) -> bool:
+	if wire_path.size() > 0:
+		var socket_list = map_sockets.get_used_cells()
+		return socket_list.has(wire_path[0])
+	else:
+		return true

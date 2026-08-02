@@ -4,6 +4,14 @@ extends Node2D
 @onready var body = $Body_Anim
 @onready var ui = $"/root/Main/UI"
 
+@onready var sfx_move = $move
+@onready var sfx_noBattery = $no_move
+@onready var sfx_plugIn = $plug_in
+@onready var sfx_plugOut = $plug_out
+@onready var sfx_retractCable = $retract
+@onready var sfx_doioing = $doioing
+@onready var sfx_batteryCharging = $charging
+
 var max_charges
 var max_wire_length
 
@@ -55,10 +63,21 @@ func _physics_process(delta: float) -> void:
 			charge = max_charges
 		else:
 			charge -= 1
-	
+	if desired_cell != current_cell and _is_valid_move(desired_cell) == false and charge != 0:
+		sfx_doioing.pitch_scale = randf_range(0.8, 1.2)
+		sfx_doioing.play()
+		
+	if desired_cell != current_cell and charge == 0:
+		sfx_noBattery.pitch_scale = randf_range(0.9, 1.1)
+		sfx_noBattery.play()
+		
 	if Input.is_action_just_pressed("retract"):
 		_pull_wire()
-		is_plugged = map.is_plugged(wire_path)
+		
+		_check_plugged_change()
+			
+		sfx_retractCable.pitch_scale = randf_range(0.75, 1.25)
+		sfx_retractCable.play()
 		
 		if is_plugged:
 			charge = max_charges
@@ -69,19 +88,31 @@ func _is_valid_move(cell: Vector2i) -> bool:
 func _move_to_cell(cell: Vector2i) -> void:
 	_update_wire(cell, current_cell)
 	
+	sfx_move.pitch_scale = randf_range(0.9, 1.1)
+	sfx_move.play()
+	
 	position = map.cell_to_world(cell)
 	current_cell = map.world_to_cell(position)
 
+func _check_plugged_change():
+	var is_pluggedNew = map.is_plugged(wire_path)
+	if (is_pluggedNew != is_plugged):
+		if (is_plugged == false):
+			sfx_plugIn.play()
+		else:
+			sfx_plugOut.play()
+		is_plugged = is_pluggedNew
+
 func _update_wire(cell: Vector2i, current_cell: Vector2i) -> void:
 	
-	is_plugged = map.is_plugged(wire_path)
+	_check_plugged_change()
 	
 	if wire_path.size() > max_wire_length or !is_plugged:
 		_drag_wire(cell, facing)
 	else:
 		_add_wire(cell, facing)
 
-	is_plugged = map.is_plugged(wire_path)
+	_check_plugged_change()
 
 func _undo_move() -> void:
 	var desired_cell = wire_path.pop_back()

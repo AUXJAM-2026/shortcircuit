@@ -2,6 +2,7 @@ extends Node2D
 
 @export var levels: Array[PackedScene]
 @export var player_scene: PackedScene
+@onready var bgm = $BackgroundMusic
 
 func _ready():
 	summon_level_and_player(0)
@@ -28,3 +29,7 @@ func summon_level_and_player(level_id) -> void:
 	var player = player_scene.instantiate()
 	player.name = "Player"
 	self.add_child(player)
+
+
+func _on_background_music_finished() -> void:
+	bgm.play()

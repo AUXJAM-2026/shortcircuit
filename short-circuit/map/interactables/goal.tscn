@@ -1,0 +1,25 @@
+[gd_scene load_steps=5 format=3 uid="uid://cvciwa2373blt"]
+
+[ext_resource type="Texture2D" uid="uid://bbak185t8qqjc" path="res://sprites/tilemap_external_electrical.png" id="1_s0orf"]
+[ext_resource type="Script" uid="uid://dahtrofpugq66" path="res://map/interactables/goal.gd" id="1_wxhn8"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_s0orf"]
+atlas = ExtResource("1_s0orf")
+region = Rect2(0, 256, 128, 128)
+filter_clip = true
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_0skng"]
+size = Vector2(120, 120)
+
+[node name="Goal" type="Node2D"]
+script = ExtResource("1_wxhn8")
+
+[node name="IMAGE" type="Sprite2D" parent="."]
+texture = SubResource("AtlasTexture_s0orf")
+
+[node name="Interactable_Area" type="Area2D" parent="."]
+
+[node name="Collision" type="CollisionShape2D" parent="Interactable_Area"]
+shape = SubResource("RectangleShape2D_0skng")
+
+[connection signal="area_entered" from="Interactable_Area" to="." method="_on_interactable_area_area_entered"]

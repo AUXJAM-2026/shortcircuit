@@ -6,28 +6,12 @@ extends Node2D
 @onready var cam = $Camera2D
 
 func _ready():
-	summon_level_and_player(0)
-
-func load_level(level_id) -> void:
-	var children = self.get_children()
-	
-	for child in children:
-		if child.name == "Map":
-			self.remove_child(child)
-		if child.name == "Player":
-			child.remove_child(cam)
-			self.add_child(cam)
-			self.remove_child(child)
-	
-	summon_level_and_player(level_id)
-
-func summon_level_and_player(level_id) -> void:
-	var level = level_id
+	var level = LevelProgress.current_level
 	
 	if level > levels.size():
 		level = levels.size() - 1
 	
-	var map = levels[0].instantiate()
+	var map = levels[level].instantiate()
 	map.name = "Map"
 	self.add_child(map)
 	
@@ -36,7 +20,6 @@ func summon_level_and_player(level_id) -> void:
 	self.add_child(player)
 	self.remove_child(cam)
 	player.add_child(cam)
-
 
 func _on_background_music_finished() -> void:
 	bgm.play()

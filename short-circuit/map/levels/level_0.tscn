@@ -1,7 +1,8 @@
-[gd_scene load_steps=3 format=4 uid="uid://clwj5mnsqbkra"]
+[gd_scene load_steps=4 format=4 uid="uid://clwj5mnsqbkra"]
 
 [ext_resource type="Script" uid="uid://tqsqj3lb043s" path="res://map/grid_map.gd" id="1_n4juf"]
 [ext_resource type="TileSet" uid="uid://kxqpqc0vx2k8" path="res://map/TileSet.tres" id="2_6ch3b"]
+[ext_resource type="PackedScene" uid="uid://bgec1fo2cxu7d" path="res://map/interactables/button.tscn" id="3_bw6gs"]
 
 [node name="Map" type="Node2D"]
 script = ExtResource("1_n4juf")
@@ -24,3 +25,6 @@ tile_set = ExtResource("2_6ch3b")
 
 [node name="Plugs" type="TileMapLayer" parent="."]
 tile_set = ExtResource("2_6ch3b")
+
+[node name="Switch" parent="." instance=ExtResource("3_bw6gs")]
+position = Vector2(-192, -192)

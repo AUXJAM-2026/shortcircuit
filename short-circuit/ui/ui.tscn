@@ -7,19 +7,13 @@
 [sub_resource type="Theme" id="Theme_27fn8"]
 HBoxContainer/constants/separation = 0
 
-[node name="UI" type="Control"]
-layout_mode = 3
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
+[node name="UI" type="CanvasLayer"]
 script = ExtResource("1_nltto")
 
 [node name="Battery" type="HBoxContainer" parent="."]
-layout_mode = 0
-offset_right = 40.0
-offset_bottom = 40.0
+offset_top = 40.0
+offset_right = 128.0
+offset_bottom = 168.0
 theme = SubResource("Theme_27fn8")
 
 [node name="End" type="TextureRect" parent="Battery"]

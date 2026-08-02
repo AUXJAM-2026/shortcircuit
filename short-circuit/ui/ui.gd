@@ -1,4 +1,4 @@
-extends Control
+extends CanvasLayer
 
 @onready var battery_middle = $Battery/Middle
 @export var battery_middle_piece_scene = TextureRect

@@ -8,7 +8,7 @@
 
 [node name="Main" type="Node2D"]
 script = ExtResource("1_1bvp3")
-levels = Array[PackedScene]([ExtResource("2_lquwl")])
+levels = Array[PackedScene]([ExtResource("2_lquwl"), null])
 player_scene = ExtResource("2_0xm2m")
 
 [node name="UI" parent="." instance=ExtResource("3_h2yge")]

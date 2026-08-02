@@ -33,7 +33,7 @@ func _ready():
 	charge = max_charges
 	length = max_wire_length
 	
-	_move_to_cell(Vector2i(0, 0))
+	_move_to_cell(map.get_spawn_cell())
 	_update_anim(facing)
 	
 

@@ -9,6 +9,8 @@ var astar := AStarGrid2D.new()
 @export var max_charges := 3
 @export var max_wire_length := 5
 
+@export var spawn_cell:= Vector2i(0, 0)
+
 func _ready():
 	_build_grid_from_tiles()
 
@@ -62,3 +64,6 @@ func get_max_charges() -> int:
 
 func get_max_wire_length() -> int:
 	return max_wire_length
+
+func get_spawn_cell() -> Vector2i:
+	return spawn_cell

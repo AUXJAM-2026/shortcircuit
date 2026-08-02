@@ -1,12 +1,12 @@
-[gd_scene load_steps=7 format=3 uid="uid://be4e3kvf4tvmm"]
+[gd_scene load_steps=8 format=3 uid="uid://be4e3kvf4tvmm"]
 
 [ext_resource type="Script" uid="uid://dxb2dsf03ifjf" path="res://main.gd" id="1_1bvp3"]
 [ext_resource type="PackedScene" uid="uid://8mnt2pbk7kse" path="res://player/player.tscn" id="2_0xm2m"]
 [ext_resource type="PackedScene" uid="uid://dsmevhq5lfhq6" path="res://map/levels/level_1.tscn" id="2_7mycd"]
 [ext_resource type="PackedScene" uid="uid://dyu1yklmoqjtk" path="res://map/levels/level_2.tscn" id="3_272bh"]
 [ext_resource type="PackedScene" uid="uid://6l1skh0rk6go" path="res://ui/ui.tscn" id="3_h2yge"]
-[ext_resource type="AudioStream" uid="uid://cmvv0ieu8e8me" path="res://sfx/music.wav" id="5_lquwl"]
 [ext_resource type="PackedScene" uid="uid://dacn1xc0m7us1" path="res://map/levels/level_3.tscn" id="4_5vw27"]
+[ext_resource type="AudioStream" uid="uid://cmvv0ieu8e8me" path="res://sfx/music.wav" id="5_lquwl"]
 
 [node name="Main" type="Node2D"]
 script = ExtResource("1_1bvp3")
@@ -27,6 +27,9 @@ size_flags_horizontal = 0
 size_flags_vertical = 0
 
 [node name="Camera2D" type="Camera2D" parent="."]
+position_smoothing_enabled = true
+drag_horizontal_enabled = true
+drag_vertical_enabled = true
 
 [node name="BackgroundMusic" type="AudioStreamPlayer" parent="."]
 stream = ExtResource("5_lquwl")

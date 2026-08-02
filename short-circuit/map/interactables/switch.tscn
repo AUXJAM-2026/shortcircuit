@@ -1,0 +1,29 @@
+[gd_scene load_steps=5 format=3 uid="uid://cqh2kyvcmc43a"]
+
+[ext_resource type="Texture2D" uid="uid://bbak185t8qqjc" path="res://sprites/tilemap_external_electrical.png" id="1_0skng"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_0skng"]
+atlas = ExtResource("1_0skng")
+region = Rect2(128, 128, 128, 128)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_3fqoy"]
+atlas = ExtResource("1_0skng")
+region = Rect2(128, 0, 128, 128)
+filter_clip = true
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_0skng"]
+size = Vector2(120, 120)
+
+[node name="Switch" type="Node2D"]
+
+[node name="ON" type="Sprite2D" parent="."]
+texture = SubResource("AtlasTexture_0skng")
+
+[node name="OFF" type="Sprite2D" parent="."]
+texture = SubResource("AtlasTexture_3fqoy")
+
+[node name="Interactable_Area" type="Area2D" parent="."]
+
+[node name="Collision" type="CollisionShape2D" parent="Interactable_Area"]
+shape = SubResource("RectangleShape2D_0skng")

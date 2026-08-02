@@ -13,6 +13,16 @@ script = ExtResource("1_1bvp3")
 levels = Array[PackedScene]([ExtResource("2_7mycd"), ExtResource("3_272bh"), ExtResource("4_5vw27")])
 player_scene = ExtResource("2_0xm2m")
 
+[node name="Camera2D" type="Camera2D" parent="."]
+position_smoothing_enabled = true
+drag_horizontal_enabled = true
+drag_vertical_enabled = true
+
+[node name="BackgroundMusic" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("5_lquwl")
+volume_db = -20.558
+autoplay = true
+
 [node name="UI" parent="." instance=ExtResource("3_h2yge")]
 anchors_preset = 0
 anchor_right = 0.0
@@ -25,15 +35,5 @@ grow_horizontal = 1
 grow_vertical = 1
 size_flags_horizontal = 0
 size_flags_vertical = 0
-
-[node name="Camera2D" type="Camera2D" parent="."]
-position_smoothing_enabled = true
-drag_horizontal_enabled = true
-drag_vertical_enabled = true
-
-[node name="BackgroundMusic" type="AudioStreamPlayer" parent="."]
-stream = ExtResource("5_lquwl")
-volume_db = -20.558
-autoplay = true
 
 [connection signal="finished" from="BackgroundMusic" to="." method="_on_background_music_finished"]

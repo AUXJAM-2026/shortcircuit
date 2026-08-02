@@ -28,6 +28,7 @@ position = Vector2(-64, 192)
 
 [node name="Switch2" parent="Interactables" instance=ExtResource("4_wv35u")]
 position = Vector2(576, 704)
+color = Color(0.821181, 0.245504, 0.517378, 1)
 
 [node name="Wire" type="TileMapLayer" parent="."]
 tile_set = ExtResource("2_vd6rj")

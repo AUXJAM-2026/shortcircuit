@@ -99,6 +99,8 @@ func _move_to_cell(cell: Vector2i) -> void:
 	
 	position = map.cell_to_world(cell)
 	current_cell = map.world_to_cell(position)
+	
+	map.check_switches(current_cell)
 
 func _check_plugged_change():
 	var is_pluggedNew = map.is_plugged(wire_path)

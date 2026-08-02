@@ -7,13 +7,18 @@ var astar := AStarGrid2D.new()
 @onready var map_sockets = $Sockets
 @onready var map_charger = $Boost
 
+@onready var map_obstacle = $Obstacle
+
 @export var max_charges := 3
 @export var max_wire_length := 5
 
 @export var spawn_cell:= Vector2i(0, 0)
 
+var switches = []
+
 func _ready():
 	_build_grid_from_tiles()
+	switches = get_tree().get_nodes_in_group("switches") 
 
 func _build_grid_from_tiles() -> void:
 	astar = AStarGrid2D.new()
@@ -30,8 +35,9 @@ func _build_grid_from_tiles() -> void:
 			var cell: Vector2i = used_rect.position + Vector2i(x, y)
 
 			var tile_data: TileData = map_barrier.get_cell_tile_data(cell)
+			var tile_data_obst: TileData = map_obstacle.get_cell_tile_data(cell)
 
-			if tile_data and tile_data.get_collision_polygons_count(0) >= 0:
+			if tile_data or tile_data_obst:
 				astar.set_point_solid(cell, true)
 
 func is_moveable(cell: Vector2i) -> bool:
@@ -72,3 +78,9 @@ func get_max_wire_length() -> int:
 
 func get_spawn_cell() -> Vector2i:
 	return spawn_cell
+	
+func check_switches(player_cell: Vector2i):
+	for switch in switches:
+		if switch.switch_pos == player_cell:
+			switch.activate()
+			_build_grid_from_tiles()

@@ -1,6 +1,7 @@
-[gd_scene load_steps=5 format=3 uid="uid://cqh2kyvcmc43a"]
+[gd_scene load_steps=6 format=3 uid="uid://cqh2kyvcmc43a"]
 
 [ext_resource type="Texture2D" uid="uid://bbak185t8qqjc" path="res://sprites/tilemap_external_electrical.png" id="1_0skng"]
+[ext_resource type="AudioStream" uid="uid://bmhkbkvlai8oi" path="res://sfx/activate.wav" id="2_3fqoy"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_0skng"]
 atlas = ExtResource("1_0skng")
@@ -27,3 +28,6 @@ texture = SubResource("AtlasTexture_3fqoy")
 
 [node name="Collision" type="CollisionShape2D" parent="Interactable_Area"]
 shape = SubResource("RectangleShape2D_0skng")
+
+[node name="activate" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("2_3fqoy")

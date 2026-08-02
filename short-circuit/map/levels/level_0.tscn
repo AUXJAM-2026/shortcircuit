@@ -3,7 +3,7 @@
 [ext_resource type="Script" uid="uid://tqsqj3lb043s" path="res://map/grid_map.gd" id="1_n4juf"]
 [ext_resource type="TileSet" uid="uid://kxqpqc0vx2k8" path="res://map/TileSet.tres" id="2_6ch3b"]
 [ext_resource type="PackedScene" uid="uid://bgec1fo2cxu7d" path="res://map/interactables/button.tscn" id="3_bw6gs"]
-[ext_resource type="PackedScene" uid="uid://cvciwa2373blt" path="res://map/interactables/goal.tscn" id="4_j8e1y"]
+[ext_resource type="PackedScene" path="res://map/interactables/goal.tscn" id="4_j8e1y"]
 
 [node name="Map2" type="Node2D"]
 script = ExtResource("1_n4juf")
@@ -29,6 +29,10 @@ tile_set = ExtResource("2_6ch3b")
 tile_set = ExtResource("2_6ch3b")
 
 [node name="Plugs" type="TileMapLayer" parent="."]
+tile_set = ExtResource("2_6ch3b")
+
+[node name="Obstacle" type="TileMapLayer" parent="."]
+position = Vector2(-192, -192)
 tile_set = ExtResource("2_6ch3b")
 
 [node name="Switch" parent="." instance=ExtResource("3_bw6gs")]

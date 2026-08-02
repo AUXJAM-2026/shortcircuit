@@ -24,6 +24,7 @@ var facing := 0
 var current_cell: Vector2i
 
 var is_plugged = true
+var is_on_charger = false
 var is_moving = false
 
 func _ready():
@@ -58,11 +59,15 @@ func _physics_process(delta: float) -> void:
 	if desired_cell != current_cell and _is_valid_move(desired_cell) and charge > 0:
 		_move_to_cell(desired_cell)
 		_update_anim(facing)
+		is_on_charger = map.is_on_charger(current_cell)
 		
 		if is_plugged:
 			charge = max_charges
+		elif is_on_charger:
+			pass
 		else:
 			charge -= 1
+	
 	if desired_cell != current_cell and _is_valid_move(desired_cell) == false and charge != 0:
 		sfx_doioing.pitch_scale = randf_range(0.8, 1.2)
 		sfx_doioing.play()
@@ -81,6 +86,7 @@ func _physics_process(delta: float) -> void:
 		
 		if is_plugged:
 			charge = max_charges
+	
 
 func _is_valid_move(cell: Vector2i) -> bool:
 	return map.is_moveable(cell) and !wire_path.has(cell)
@@ -96,6 +102,7 @@ func _move_to_cell(cell: Vector2i) -> void:
 
 func _check_plugged_change():
 	var is_pluggedNew = map.is_plugged(wire_path)
+	
 	if (is_pluggedNew != is_plugged):
 		if (is_plugged == false):
 			sfx_plugIn.play()

@@ -5,6 +5,7 @@ var astar := AStarGrid2D.new()
 @onready var map_wire = $Wire
 @onready var map_plugs = $Plugs
 @onready var map_sockets = $Sockets
+@onready var map_charger = $Boost
 
 @export var max_charges := 3
 @export var max_wire_length := 5
@@ -58,6 +59,10 @@ func is_plugged(wire_path: Array[Vector2i]) -> bool:
 		return socket_list.has(wire_path[0])
 	else:
 		return true
+
+func is_on_charger(cell: Vector2i) -> bool:
+	var charger_list = map_charger.get_used_cells()
+	return charger_list.has(cell)
 
 func get_max_charges() -> int:
 	return max_charges

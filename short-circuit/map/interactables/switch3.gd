@@ -5,6 +5,7 @@ extends Node2D
 @export var barrier_pos: Vector2i
 
 @onready var sfx_activate = $activate
+@onready var off_sprite = $OFF
 
 var activated := false
 
@@ -18,7 +19,8 @@ func activate():
 	activated = true
 	
 	sfx_activate.play()
-	
+	off_sprite.visible = false
+		
 	_remove_barrier()
 
 func _remove_barrier():

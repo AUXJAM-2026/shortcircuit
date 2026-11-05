@@ -8,7 +8,7 @@ extends Node2D
 func _ready():
 	var level = LevelProgress.current_level
 	
-	if level > levels.size():
+	if level >= levels.size():
 		level = levels.size() - 1
 	
 	var map = levels[level].instantiate()

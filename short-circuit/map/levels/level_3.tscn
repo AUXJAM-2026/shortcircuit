@@ -5,7 +5,7 @@
 [ext_resource type="PackedScene" uid="uid://cqh2kyvcmc43a" path="res://map/interactables/switch.tscn" id="3_miykl"]
 [ext_resource type="PackedScene" uid="uid://bgec1fo2cxu7d" path="res://map/interactables/button.tscn" id="4_gnm33"]
 
-[node name="Map" type="Node2D"]
+[node name="Map3" type="Node2D"]
 script = ExtResource("1_trr06")
 spawn_cell = Vector2i(-5, -2)
 

@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=4 uid="uid://dsmevhq5lfhq6"]
+[gd_scene load_steps=9 format=4 uid="uid://dsmevhq5lfhq6"]
 
 [ext_resource type="Script" uid="uid://tqsqj3lb043s" path="res://map/grid_map.gd" id="1_iuesu"]
 [ext_resource type="TileSet" uid="uid://kxqpqc0vx2k8" path="res://map/TileSet.tres" id="2_vd6rj"]
@@ -7,6 +7,7 @@
 [ext_resource type="Script" uid="uid://bgkd0jl7no6om" path="res://map/interactables/switch2.gd" id="5_1snkl"]
 [ext_resource type="Script" uid="uid://cevwrekkl426v" path="res://map/interactables/switch3.gd" id="6_ja74h"]
 [ext_resource type="Script" uid="uid://bkomxs23lm8tl" path="res://map/interactables/switch4.gd" id="7_1s3v2"]
+[ext_resource type="PackedScene" uid="uid://cvciwa2373blt" path="res://map/interactables/goal.tscn" id="8_e761b"]
 
 [node name="Map" type="Node2D"]
 script = ExtResource("1_iuesu")
@@ -58,6 +59,9 @@ script = ExtResource("7_1s3v2")
 switch_pos = Vector2i(4, 7)
 barrier_layer = NodePath("../../Obstacle")
 barrier_pos = Vector2i(3, 8)
+
+[node name="Goal" parent="Interactables" instance=ExtResource("8_e761b")]
+position = Vector2(448, 1216)
 
 [node name="Obstacle" type="TileMapLayer" parent="."]
 tile_map_data = PackedByteArray("AAABAAQAAQADAAAAAFAIAP//AQADAAAAAAACAAUAAQADAAAAADADAAgAAQADAAAAAGA=")
